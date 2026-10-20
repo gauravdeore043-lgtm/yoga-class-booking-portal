@@ -41,6 +41,39 @@ public class BookingController {
         }
     }
 
+    @PostMapping("/bookings/{reference}/confirm")
+    public String confirm(@PathVariable String reference, HttpSession session, RedirectAttributes redirect) {
+        try {
+            Booking booking = bookingService.confirm(reference, SessionKeys.memberId(session));
+            redirect.addFlashAttribute("success", "Booking " + booking.getReference() + " is confirmed. See you on the mat!");
+        } catch (BookingException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/bookings/" + reference;
+    }
+
+    @PostMapping("/bookings/{reference}/cancel")
+    public String cancel(@PathVariable String reference, HttpSession session, RedirectAttributes redirect) {
+        try {
+            Booking booking = bookingService.cancel(reference, SessionKeys.memberId(session));
+            redirect.addFlashAttribute("success", "Booking " + booking.getReference() + " was cancelled and your seat released.");
+        } catch (BookingException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/bookings/" + reference;
+    }
+
+    @GetMapping("/my-bookings")
+    public String myBookings(HttpSession session, Model model, RedirectAttributes redirect) {
+        Long memberId = SessionKeys.memberId(session);
+        if (memberId == null) {
+            redirect.addFlashAttribute("error", "Please sign in to see your bookings.");
+            return "redirect:/register";
+        }
+        model.addAttribute("bookings", bookingService.bookingsFor(memberId));
+        return "my-bookings";
+    }
+
     @GetMapping("/bookings/{reference}")
     public String bookingDetail(@PathVariable String reference, HttpSession session, Model model,
                                 RedirectAttributes redirect) {
