@@ -50,6 +50,30 @@ public class BookingService {
         return bookings.save(new Booking(newReference(), member, slot));
     }
 
+    /** Confirms a REQUESTED booking owned by the member. */
+    public Booking confirm(String reference, Long memberId) {
+        Booking booking = ownedBooking(reference, memberId);
+        booking.confirm();
+        return booking;
+    }
+
+    /** Cancels a booking owned by the member and gives the seat back to the class. */
+    public Booking cancel(String reference, Long memberId) {
+        Booking booking = ownedBooking(reference, memberId);
+        booking.cancel();
+        booking.getSlot().releaseSeat();
+        return booking;
+    }
+
+    private Booking ownedBooking(String reference, Long memberId) {
+        Booking booking = findByReference(reference)
+                .orElseThrow(() -> new BookingException("No booking found with reference " + reference + "."));
+        if (!booking.isOwnedBy(memberId)) {
+            throw new BookingException("You can only manage your own bookings. Please sign in as the member who booked.");
+        }
+        return booking;
+    }
+
     @Transactional(readOnly = true)
     public Optional<Booking> findByReference(String reference) {
         if (reference == null || reference.isBlank()) {

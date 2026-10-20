@@ -27,6 +27,15 @@
         </dl>
 
         <div class="actions">
+            <form th:if="${isOwner and booking.status.name() == 'REQUESTED'}" class="inline-form"
+                  th:action="@{|/bookings/${booking.reference}/confirm|}" method="post">
+                <button type="submit" class="btn btn-primary" id="confirm-btn">Confirm booking</button>
+            </form>
+            <form th:if="${isOwner and booking.active}" class="inline-form"
+                  th:action="@{|/bookings/${booking.reference}/cancel|}" method="post">
+                <button type="submit" class="btn btn-danger" id="cancel-btn">Cancel booking</button>
+            </form>
+            <a class="btn btn-ghost" th:href="@{/my-bookings}" th:if="${isOwner}" id="to-my-bookings">My bookings</a>
             <a class="btn btn-ghost" th:href="@{/slots}" id="back-to-slots">Back to classes</a>
         </div>
     </section>
