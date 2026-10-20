@@ -50,3 +50,21 @@ Reports are written to `target/surefire-reports/` (JUnit XML + text), and Jenkin
 
 * **Entry:** the build compiles; Chrome is available or downloadable.
 * **Exit:** all journeys pass. Any failure fails the Jenkins *Test* stage, which blocks deployment.
+
+---
+
+# Task 10 – Continuous Testing in Jenkins
+
+* The **Test** stage of the [`Jenkinsfile`](../Jenkinsfile) runs `mvn test` (unit + Selenium) on every pipeline run.
+* `junit 'target/surefire-reports/*.xml'` publishes the **Jenkins test report**, with per-test results and a trend chart.
+* `archiveArtifacts 'target/screenshots/**'` keeps failure screenshots with the build.
+* **Deployment gate.** In declarative pipelines a failed stage skips all later stages, so *Package*, *Deploy to Tomcat* and the Docker stages
+  do not run when any test fails.
+
+## Defect drill
+
+1. A deliberate defect is committed: cancelling a booking no longer releases the seat (`BookingService.cancel`).
+2. Jenkins runs. `CancellationSeleniumTest` and `BookingServiceTest.cancelReleasesSeat` fail, the build is **FAILED** and nothing is deployed
+   (the Tomcat app keeps serving the previous good build).
+3. The fix is committed as `fix(booking): release seat when a booking is cancelled`.
+4. Jenkins reruns automatically (SCM poll). All tests pass and the build is deployed.
