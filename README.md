@@ -53,3 +53,5 @@ See [docs/04-git-branching-policy.md](docs/04-git-branching-policy.md).
 | 9–10 | [Selenium test plan and continuous testing](docs/09-selenium-test-plan.md) |
 | 11 | [Docker image and container lifecycle](docs/11-docker-lifecycle.md) |
 | 12 | [Jenkins → Docker continuous deployment](docs/12-jenkins-docker-cd.md) |
+| 13 | [Configuration specification (Ansible)](docs/13-configuration-specification.md) |
+| 14 | [Provisioning, idempotency, health check and rollback](docs/14-provisioning-and-reliability.md) |
