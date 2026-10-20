@@ -61,7 +61,6 @@ public class BookingService {
     public Booking cancel(String reference, Long memberId) {
         Booking booking = ownedBooking(reference, memberId);
         booking.cancel();
-        booking.getSlot().releaseSeat();
         return booking;
     }
 
