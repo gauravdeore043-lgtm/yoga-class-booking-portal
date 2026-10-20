@@ -16,6 +16,10 @@
         </a>
         <ul class="nav-links">
             <li><a th:href="@{/}" id="nav-home">Home</a></li>
+            <li><a th:href="@{/slots}" id="nav-slots">Classes</a></li>
+            <li th:if="${currentMember == null}"><a th:href="@{/register}" id="nav-register">Register / Sign in</a></li>
+            <li th:if="${currentMember != null}"><span class="nav-member" id="nav-member" th:text="${currentMember.name}">Member</span></li>
+            <li th:if="${currentMember != null}"><a th:href="@{/logout}" id="nav-logout">Sign out</a></li>
         </ul>
     </div>
 </header>
