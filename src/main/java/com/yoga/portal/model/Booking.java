@@ -1,5 +1,6 @@
 package com.yoga.portal.model;
 
+import com.yoga.portal.service.BookingException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -49,6 +50,25 @@ public class Booking {
         this.status = BookingStatus.REQUESTED;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
+    }
+
+    /** REQUESTED -> CONFIRMED. */
+    public void confirm() {
+        if (status != BookingStatus.REQUESTED) {
+            throw new BookingException(
+                    "Only a requested booking can be confirmed (current status: " + status + ").");
+        }
+        status = BookingStatus.CONFIRMED;
+        updatedAt = LocalDateTime.now();
+    }
+
+    /** REQUESTED or CONFIRMED -> CANCELLED. */
+    public void cancel() {
+        if (status == BookingStatus.CANCELLED) {
+            throw new BookingException("This booking is already cancelled.");
+        }
+        status = BookingStatus.CANCELLED;
+        updatedAt = LocalDateTime.now();
     }
 
     public boolean isActive() {
