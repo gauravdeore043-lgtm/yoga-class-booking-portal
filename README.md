@@ -52,3 +52,4 @@ See [docs/04-git-branching-policy.md](docs/04-git-branching-policy.md).
 | 7–8 | [Jenkins CI job, pipeline and Tomcat deployment](docs/07-jenkins-ci-and-pipeline.md) |
 | 9–10 | [Selenium test plan and continuous testing](docs/09-selenium-test-plan.md) |
 | 11 | [Docker image and container lifecycle](docs/11-docker-lifecycle.md) |
+| 12 | [Jenkins → Docker continuous deployment](docs/12-jenkins-docker-cd.md) |
