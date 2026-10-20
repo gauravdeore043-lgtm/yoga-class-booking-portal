@@ -1,0 +1,30 @@
+# ---- Configuration specification for a Yoga portal node (see docs/13) ----
+app_name: yoga-portal
+app_user: yoga
+app_group: yoga
+app_home: /opt/yoga
+app_port: 8080                 # container port; published on the host as 8095
+app_environment: ansible
+java_opts: "-Xms128m -Xmx384m"
+
+# Release to deploy. Override per run: -e release_version=1.1.0 -e war_source=/path/to/yoga-portal-1.1.0.war
+release_version: "1.1.0"
+war_source: "{{ playbook_dir }}/../target/yoga-portal.war"
+
+required_packages:
+  - openjdk-21-jre-headless
+  - curl
+  - procps
+  - ca-certificates
+  - tzdata
+
+app_directories:
+  - "{{ app_home }}"
+  - "{{ app_home }}/releases"
+  - "{{ app_home }}/config"
+  - "{{ app_home }}/logs"
+  - "{{ app_home }}/run"
+  - "{{ app_home }}/bin"
+
+health_url: "http://127.0.0.1:{{ app_port }}/actuator/health"
+version_url: "http://127.0.0.1:{{ app_port }}/api/version"

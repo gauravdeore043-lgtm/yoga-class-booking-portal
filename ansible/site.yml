@@ -1,0 +1,140 @@
+---
+# Provision a clean node and deploy one release of the Yoga Class Booking Portal.
+#   ansible-playbook site.yml -e release_version=1.1.0 -e war_source=/abs/path/yoga-portal-1.1.0.war
+# Safe to re-run: a second run with the same inputs reports changed=0.
+
+- name: Provision and deploy the Yoga Class Booking Portal
+  hosts: yoga_nodes
+  become: false            # the docker connection already runs as root inside the node
+  gather_facts: false
+
+  pre_tasks:
+    - name: Bootstrap Python on a clean node (needed by Ansible modules)
+      ansible.builtin.raw: >
+        test -x /usr/bin/python3 && dpkg -s python3-apt >/dev/null 2>&1 && echo PRESENT ||
+        (apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3 python3-apt >/dev/null && echo INSTALLED)
+      register: bootstrap
+      changed_when: "'INSTALLED' in bootstrap.stdout"
+
+    - name: Gather facts
+      ansible.builtin.setup:
+        gather_subset: [min]
+
+  tasks:
+    # ---------- packages ----------
+    - name: Install required packages (Java 21 runtime, curl, procps)
+      ansible.builtin.apt:
+        name: "{{ required_packages }}"
+        state: present
+        update_cache: true
+        cache_valid_time: 86400
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+
+    # ---------- users ----------
+    - name: Create application group
+      ansible.builtin.group:
+        name: "{{ app_group }}"
+        system: true
+
+    - name: Create unprivileged application user
+      ansible.builtin.user:
+        name: "{{ app_user }}"
+        group: "{{ app_group }}"
+        system: true
+        home: "{{ app_home }}"
+        create_home: false
+        shell: /usr/sbin/nologin
+
+    # ---------- folders ----------
+    - name: Create application directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: "0755"
+      loop: "{{ app_directories }}"
+
+    - name: Create release directory {{ release_version }}
+      ansible.builtin.file:
+        path: "{{ app_home }}/releases/{{ release_version }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: "0755"
+
+    # ---------- files ----------
+    - name: Upload release artefact {{ release_version }}
+      ansible.builtin.copy:
+        src: "{{ war_source }}"
+        dest: "{{ app_home }}/releases/{{ release_version }}/{{ app_name }}.war"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: "0644"
+
+    - name: Write application configuration
+      ansible.builtin.template:
+        src: application.properties.j2
+        dest: "{{ app_home }}/config/application.properties"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: "0640"
+      notify: Restart yoga-portal
+
+    - name: Install service control script
+      ansible.builtin.template:
+        src: yoga-ctl.j2
+        dest: "{{ app_home }}/bin/yoga-ctl"
+        owner: root
+        group: root
+        mode: "0755"
+      notify: Restart yoga-portal
+
+    - name: Point 'current' at release {{ release_version }}
+      ansible.builtin.file:
+        src: "{{ app_home }}/releases/{{ release_version }}"
+        dest: "{{ app_home }}/current"
+        state: link
+        force: true
+      notify: Restart yoga-portal
+
+    # ---------- services ----------
+    - name: Apply pending restarts before checking the service
+      ansible.builtin.meta: flush_handlers
+
+    - name: Ensure yoga-portal service is running
+      ansible.builtin.command: "{{ app_home }}/bin/yoga-ctl start"
+      register: service_start
+      changed_when: "'started' in service_start.stdout"
+
+    # ---------- ports + health ----------
+    - name: Wait for port {{ app_port }} to listen
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ app_port }}"
+        timeout: 120
+
+    - name: Health check (/actuator/health must be UP)
+      ansible.builtin.uri:
+        url: "{{ health_url }}"
+        return_content: true
+      register: health
+      until: health.json is defined and health.json.status == 'UP'
+      retries: 40
+      delay: 3
+
+    - name: Read deployed version
+      ansible.builtin.uri:
+        url: "{{ version_url }}"
+        return_content: true
+      register: version
+
+    - name: Deployment summary
+      ansible.builtin.debug:
+        msg: "{{ app_name }} {{ version.json.version }} ({{ version.json.environment }}) is {{ health.json.status }} on port {{ app_port }}"
+
+  handlers:
+    - name: Restart yoga-portal
+      ansible.builtin.command: "{{ app_home }}/bin/yoga-ctl restart"
+      changed_when: true
