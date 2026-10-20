@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('My bookings')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <h1 id="my-bookings-title">My bookings</h1>
+
+    <p th:if="${#lists.isEmpty(bookings)}" class="muted" id="no-bookings">
+        You have no bookings yet. <a th:href="@{/slots}">Browse classes</a>.
+    </p>
+
+    <div class="table-wrap" th:unless="${#lists.isEmpty(bookings)}">
+        <table id="my-bookings-table">
+            <thead>
+            <tr>
+                <th>Reference</th>
+                <th>Class</th>
+                <th>When</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="b : ${bookings}" class="my-booking-row" th:attr="data-ref=${b.reference}">
+                <td class="ref"><strong th:text="${b.reference}">YB-XXXXXX</strong></td>
+                <td th:text="${b.slot.title}">Hatha</td>
+                <td th:text="${#temporals.format(b.slot.startTime, 'EEE dd MMM, hh:mm a')}">Mon</td>
+                <td><span class="badge status" th:classappend="|badge-${b.status}|" th:text="${b.status}">REQUESTED</span></td>
+                <td><a th:href="@{|/bookings/${b.reference}|}" class="btn btn-ghost btn-small">Manage</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

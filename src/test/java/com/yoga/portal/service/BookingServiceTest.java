@@ -71,6 +71,49 @@ class BookingServiceTest {
     }
 
     @Test
+    void confirmMovesRequestedToConfirmed() {
+        Member member = newMember();
+        Booking booking = bookingService.requestBooking(member.getId(), newSlot(5).getId());
+
+        Booking confirmed = bookingService.confirm(booking.getReference(), member.getId());
+
+        assertThat(confirmed.getStatus()).isEqualTo(BookingStatus.CONFIRMED);
+    }
+
+    @Test
+    void cancelReleasesSeat() {
+        Member member = newMember();
+        YogaSlot slot = newSlot(5);
+        Booking booking = bookingService.requestBooking(member.getId(), slot.getId());
+        assertThat(slots.findById(slot.getId()).orElseThrow().getSeatsLeft()).isEqualTo(4);
+
+        Booking cancelled = bookingService.cancel(booking.getReference(), member.getId());
+
+        assertThat(cancelled.getStatus()).isEqualTo(BookingStatus.CANCELLED);
+        assertThat(slots.findById(slot.getId()).orElseThrow().getSeatsLeft()).isEqualTo(5);
+    }
+
+    @Test
+    void cancelledBookingCannotBeConfirmed() {
+        Member member = newMember();
+        Booking booking = bookingService.requestBooking(member.getId(), newSlot(5).getId());
+        bookingService.cancel(booking.getReference(), member.getId());
+
+        assertThatThrownBy(() -> bookingService.confirm(booking.getReference(), member.getId()))
+                .isInstanceOf(BookingException.class);
+    }
+
+    @Test
+    void onlyOwnerCanCancel() {
+        Booking booking = bookingService.requestBooking(newMember().getId(), newSlot(5).getId());
+        Long otherMember = newMember().getId();
+
+        assertThatThrownBy(() -> bookingService.cancel(booking.getReference(), otherMember))
+                .isInstanceOf(BookingException.class)
+                .hasMessageContaining("your own bookings");
+    }
+
+    @Test
     void duplicateEmailRegistrationIsRejected() {
         String email = "dup" + System.nanoTime() + "@example.com";
         memberService.register("First", email, "9876543210");
