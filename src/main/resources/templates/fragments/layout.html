@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' · Yoga Class Booking Portal'">Yoga Class Booking Portal</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header th:fragment="nav" class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-mark" aria-hidden="true">&#9675;</span>
+            <span>Prana Studio</span>
+        </a>
+        <ul class="nav-links">
+            <li><a th:href="@{/}" id="nav-home">Home</a></li>
+        </ul>
+    </div>
+</header>
+
+<div th:fragment="flash">
+    <div th:if="${success}" id="flash-success" class="flash flash-success" th:text="${success}"></div>
+    <div th:if="${error}" id="flash-error" class="flash flash-error" th:text="${error}"></div>
+</div>
+
+<footer th:fragment="footer" class="site-footer">
+    <div class="container footer-inner">
+        <span>Yoga Class Booking Portal</span>
+        <span id="app-meta">v<span id="app-version" th:text="${appVersion}">1.0.0</span>
+            &middot; env: <span id="app-environment" th:text="${appEnvironment}">local</span></span>
+    </div>
+</footer>
+
+</body>
+</html>

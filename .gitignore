@@ -1,0 +1,26 @@
+# Build output
+target/
+*.war
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and local runtime data
+*.log
+logs/
+*.mv.db
+*.trace.db
+
+# Secrets / local env
+.env
+*.secret

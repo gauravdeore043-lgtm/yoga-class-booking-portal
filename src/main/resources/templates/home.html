@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Home')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <section class="hero">
+        <p class="eyebrow">Prana Studio &middot; Pune</p>
+        <h1 id="home-title">Book your next yoga class in under a minute.</h1>
+        <p class="lead">See which classes have seats, request a spot, confirm it and track its status,
+            without calling the front desk or chasing WhatsApp messages.</p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" th:href="@{/slots}" id="cta-slots">Browse classes</a>
+            <a class="btn btn-ghost" th:href="@{/register}" id="cta-register">Create member account</a>
+        </div>
+    </section>
+
+    <section class="steps">
+        <div class="step"><span class="step-no">1</span><h3>Register</h3><p>Create a member account with your name, email and phone.</p></div>
+        <div class="step"><span class="step-no">2</span><h3>Pick a slot</h3><p>Live seat counts for every class this week.</p></div>
+        <div class="step"><span class="step-no">3</span><h3>Request &amp; confirm</h3><p>Your seat is held as soon as you request it.</p></div>
+        <div class="step"><span class="step-no">4</span><h3>Track or cancel</h3><p>Check status by reference, or cancel to free the seat.</p></div>
+    </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
