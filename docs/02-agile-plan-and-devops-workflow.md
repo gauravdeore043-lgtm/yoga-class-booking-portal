@@ -17,21 +17,24 @@
 
 | Task | Backlog item | Story | DevOps task | Status |
 |---|---|---|---|---|
-| T01 | Problem statement, stakeholders, MVP scope | – | Task 1 | To do |
-| T02 | User stories, backlog, sprint plan, DoD, workflow diagram | – | Task 2 | To do |
-| T03 | SRS, architecture, data model, API list, local setup | – | Task 3 | To do |
-| T04 | GitHub repo, README, .gitignore, templates, branch policy | – | Task 4 | To do |
-| T05 | Member registration and sign-in | US1 | Task 5 | To do |
-| T06 | Slot catalogue with live seats | US2 | Task 5 | To do |
-| T07 | Booking request with seat hold | US3 | Task 5 | To do |
-| T08 | Booking confirmation + cancellation | US4, US5 | Task 6 | To do |
-| T09 | Status tracking page and REST API | US6 | Task 6 | To do |
+| T01 | Problem statement, stakeholders, MVP scope | – | Task 1 | Done ✅ |
+| T02 | User stories, backlog, sprint plan, DoD, workflow diagram | – | Task 2 | Done ✅ |
+| T03 | SRS, architecture, data model, API list, local setup | – | Task 3 | Done ✅ |
+| T04 | GitHub repo, README, .gitignore, templates, branch policy | – | Task 4 | Done ✅ |
+| T05 | Member registration and sign-in | US1 | Task 5 | Done ✅ |
+| T06 | Slot catalogue with live seats | US2 | Task 5 | Done ✅ |
+| T07 | Booking request with seat hold | US3 | Task 5 | Done ✅ |
+| T08 | Booking confirmation + cancellation | US4, US5 | Task 6 | Done ✅ |
+| T09 | Status tracking page and REST API | US6 | Task 6 | Done ✅ |
 | T10 | Jenkins CI job with polling + archived WAR | US7 | Task 7 | To do |
 | T11 | Jenkinsfile + Tomcat deployment (parameterised) | US7 | Task 8 | To do |
 | T12 | Selenium suite (5 journeys) + Jenkins test gate | US7 | Tasks 9–10 | To do |
 | T13 | Dockerfile + container lifecycle | US7 | Task 11 | To do |
 | T14 | Jenkins → Docker registry → container CD | US7 | Task 12 | To do |
 | T15 | Ansible provisioning, idempotency, health check, rollback | US8 | Tasks 13–14 | To do |
+
+**Backlog update (end of Sprint 2):** T01–T09 are done and released as `v1.0.0`.
+T10–T15 move to Sprints 3–4.
 
 ## 3. Sprint plan (Scrum, 1-week sprints)
 

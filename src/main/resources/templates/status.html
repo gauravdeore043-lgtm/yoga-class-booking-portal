@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Track status')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <h1 id="status-title">Track a booking</h1>
+    <p class="lead">Enter the booking reference, for example <code>YB-7KQ2MP</code>.</p>
+
+    <section class="card">
+        <form id="status-form" th:action="@{/status}" method="get">
+            <div class="form-row">
+                <label for="ref">Booking reference</label>
+                <input type="text" id="ref" name="ref" th:value="${ref}" placeholder="YB-XXXXXX" autocomplete="off">
+            </div>
+            <button type="submit" class="btn btn-primary" id="track-btn">Track status</button>
+        </form>
+    </section>
+
+    <section class="card" style="margin-top:20px" th:if="${booking != null}" id="status-result">
+        <dl class="detail-list">
+            <dt>Reference</dt>
+            <dd id="status-ref" th:text="${booking.reference}">YB-XXXXXX</dd>
+            <dt>Status</dt>
+            <dd><span id="status-value" class="badge" th:classappend="|badge-${booking.status}|"
+                      th:text="${booking.status}">REQUESTED</span></dd>
+            <dt>Class</dt>
+            <dd id="status-class" th:text="${booking.slot.title}">Hatha</dd>
+            <dt>When</dt>
+            <dd th:text="${#temporals.format(booking.slot.startTime, 'EEEE dd MMM yyyy, hh:mm a')}">Mon</dd>
+            <dt>Member</dt>
+            <dd th:text="${booking.member.name}">Name</dd>
+            <dt>Last updated</dt>
+            <dd th:text="${#temporals.format(booking.updatedAt, 'dd MMM yyyy, hh:mm a')}">now</dd>
+        </dl>
+    </section>
+
+    <div th:if="${searched != null and booking == null}" class="flash flash-error" style="margin-top:20px" id="status-not-found">
+        No booking found for reference <strong th:text="${ref}">YB-XXXXXX</strong>.
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
