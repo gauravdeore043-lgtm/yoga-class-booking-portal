@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Classes')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <h1 id="slots-title">Classes this week</h1>
+    <p class="lead">Seat counts update the moment someone books or cancels.</p>
+    <p class="muted" th:if="${currentMember == null}" id="slots-signin-hint">
+        <a th:href="@{/register}">Register or sign in</a> to book a class.
+    </p>
+
+    <div class="table-wrap">
+        <table id="slots-table">
+            <thead>
+            <tr>
+                <th>Class</th>
+                <th>Instructor</th>
+                <th>Level</th>
+                <th>When</th>
+                <th>Seats left</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${slots}" class="slot-row" th:id="|slot-${s.id}|" th:attr="data-slot-id=${s.id}">
+                <td class="slot-title"><strong th:text="${s.title}">Hatha</strong>
+                    <div class="muted" th:text="|${s.durationMinutes} min|">60 min</div></td>
+                <td class="slot-instructor" th:text="${s.instructor}">Asha</td>
+                <td class="slot-level" th:text="${s.level}">Beginner</td>
+                <td class="slot-time" th:text="${#temporals.format(s.startTime, 'EEE dd MMM, hh:mm a')}">Mon 06:30</td>
+                <td><span class="seats-pill seats-left" th:classappend="${s.full} ? 'full'"
+                          th:text="${s.seatsLeft}">5</span>
+                    <span class="muted" th:text="|of ${s.capacity}|">of 12</span></td>
+                <td>
+                    <form th:action="@{/bookings}" method="post" class="inline-form">
+                        <input type="hidden" name="slotId" th:value="${s.id}">
+                        <button type="submit" class="btn btn-primary btn-small book-btn" th:id="|book-${s.id}|"
+                                th:disabled="${s.full}" th:text="${s.full} ? 'Full' : 'Book'">Book</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

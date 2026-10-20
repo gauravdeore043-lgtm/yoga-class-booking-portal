@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Booking')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <p class="eyebrow">Booking</p>
+    <h1><span id="booking-ref" th:text="${booking.reference}">YB-XXXXXX</span></h1>
+
+    <section class="card">
+        <dl class="detail-list">
+            <dt>Status</dt>
+            <dd><span id="booking-status" class="badge" th:classappend="|badge-${booking.status}|"
+                      th:text="${booking.status}">REQUESTED</span></dd>
+            <dt>Class</dt>
+            <dd id="booking-class" th:text="${booking.slot.title}">Hatha</dd>
+            <dt>Instructor</dt>
+            <dd th:text="${booking.slot.instructor}">Asha</dd>
+            <dt>When</dt>
+            <dd th:text="${#temporals.format(booking.slot.startTime, 'EEEE dd MMM yyyy, hh:mm a')}">Mon</dd>
+            <dt>Member</dt>
+            <dd id="booking-member" th:text="${booking.member.name}">Name</dd>
+            <dt>Seats left in class</dt>
+            <dd id="booking-seats-left" th:text="${booking.slot.seatsLeft}">5</dd>
+        </dl>
+
+        <div class="actions">
+            <form th:if="${isOwner and booking.status.name() == 'REQUESTED'}" class="inline-form"
+                  th:action="@{|/bookings/${booking.reference}/confirm|}" method="post">
+                <button type="submit" class="btn btn-primary" id="confirm-btn">Confirm booking</button>
+            </form>
+            <form th:if="${isOwner and booking.active}" class="inline-form"
+                  th:action="@{|/bookings/${booking.reference}/cancel|}" method="post">
+                <button type="submit" class="btn btn-danger" id="cancel-btn">Cancel booking</button>
+            </form>
+            <a class="btn btn-ghost" th:href="@{/my-bookings}" th:if="${isOwner}" id="to-my-bookings">My bookings</a>
+            <a class="btn btn-ghost" th:href="@{/slots}" id="back-to-slots">Back to classes</a>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
