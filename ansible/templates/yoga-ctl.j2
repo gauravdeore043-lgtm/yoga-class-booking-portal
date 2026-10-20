@@ -1,0 +1,48 @@
+#!/bin/sh
+# Managed by Ansible - service control script for {{ app_name }}.
+# (The node is a container without systemd; on a VM this would be a systemd unit.)
+APP_HOME={{ app_home }}
+PIDFILE="$APP_HOME/run/{{ app_name }}.pid"
+JAVA_OPTS="{{ java_opts }}"
+
+is_running() {
+    [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null
+}
+
+start() {
+    if is_running; then
+        echo "already running (pid $(cat "$PIDFILE"))"
+        return 0
+    fi
+    cd "$APP_HOME" || exit 1
+    setsid setpriv --reuid={{ app_user }} --regid={{ app_group }} --init-groups \
+        java $JAVA_OPTS -jar "$APP_HOME/current/{{ app_name }}.war" \
+        --spring.config.additional-location="file:$APP_HOME/config/" \
+        >> "$APP_HOME/logs/console.log" 2>&1 < /dev/null &
+    echo $! > "$PIDFILE"
+    echo "started (pid $!) release $(readlink "$APP_HOME/current")"
+}
+
+stop() {
+    if is_running; then
+        pid="$(cat "$PIDFILE")"
+        kill "$pid"
+        i=0
+        while kill -0 "$pid" 2>/dev/null && [ $i -lt 30 ]; do sleep 1; i=$((i+1)); done
+        kill -0 "$pid" 2>/dev/null && kill -9 "$pid"
+        echo "stopped (pid $pid)"
+    else
+        echo "not running"
+    fi
+    rm -f "$PIDFILE"
+}
+
+case "$1" in
+    start)   start ;;
+    stop)    stop ;;
+    restart) stop; start ;;
+    status)
+        if is_running; then echo "running (pid $(cat "$PIDFILE")) release $(readlink "$APP_HOME/current")"
+        else echo "stopped"; exit 3; fi ;;
+    *) echo "usage: $0 {start|stop|restart|status}"; exit 2 ;;
+esac

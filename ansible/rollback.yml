@@ -1,0 +1,71 @@
+---
+# Roll back (or forward) to a release that is already on the node.
+#   ansible-playbook rollback.yml -e rollback_version=1.0.0
+
+- name: Roll back the Yoga Class Booking Portal to a previous stable release
+  hosts: yoga_nodes
+  gather_facts: false
+
+  tasks:
+    - name: Require the target version
+      ansible.builtin.assert:
+        that: rollback_version is defined
+        fail_msg: "Pass -e rollback_version=<x.y.z>"
+
+    - name: Find the release currently in service
+      ansible.builtin.stat:
+        path: "{{ app_home }}/current"
+      register: current
+
+    - name: Check the target release exists on the node
+      ansible.builtin.stat:
+        path: "{{ app_home }}/releases/{{ rollback_version }}/{{ app_name }}.war"
+      register: target
+
+    - name: Fail if the target release is not available
+      ansible.builtin.assert:
+        that: target.stat.exists
+        fail_msg: "Release {{ rollback_version }} not found in {{ app_home }}/releases"
+
+    - name: Show the switch
+      ansible.builtin.debug:
+        msg: "Switching from {{ current.stat.lnk_target | default('none') | basename }} to {{ rollback_version }}"
+
+    - name: Point 'current' at {{ rollback_version }}
+      ansible.builtin.file:
+        src: "{{ app_home }}/releases/{{ rollback_version }}"
+        dest: "{{ app_home }}/current"
+        state: link
+        force: true
+      register: switched
+
+    - name: Restart the service on the selected release
+      ansible.builtin.command: "{{ app_home }}/bin/yoga-ctl restart"
+      when: switched.changed
+
+    - name: Health check after rollback
+      ansible.builtin.uri:
+        url: "{{ health_url }}"
+        return_content: true
+      register: health
+      until: health.json is defined and health.json.status == 'UP'
+      retries: 40
+      delay: 3
+
+    - name: Verify the running version
+      ansible.builtin.uri:
+        url: "{{ version_url }}"
+        return_content: true
+      register: version
+      failed_when: version.json.version != rollback_version
+
+    - name: Record the rollback
+      ansible.builtin.lineinfile:
+        path: "{{ app_home }}/logs/release-history.log"
+        line: "rollback to {{ rollback_version }} (from {{ current.stat.lnk_target | default('none') | basename }})"
+        create: true
+        mode: "0644"
+
+    - name: Rollback summary
+      ansible.builtin.debug:
+        msg: "Rolled back: {{ app_name }} {{ version.json.version }} is {{ health.json.status }}"
