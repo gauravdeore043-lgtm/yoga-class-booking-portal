@@ -1,5 +1,6 @@
 // Yoga Class Booking Portal – pipeline as code
-// Stages: Checkout -> Build -> Package -> Deploy to Tomcat -> Smoke test
+// Stages: Checkout -> Build -> Test (unit + Selenium) -> Package -> Deploy to Tomcat -> Smoke test
+// A failing test fails the Test stage, so Package and Deploy never run.
 
 pipeline {
     agent any
@@ -43,6 +44,22 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'mvn -B -ntp clean compile'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Unit tests + Selenium WebDriver suite (headless Chrome)
+                sh 'mvn -B -ntp test'
+            }
+            post {
+                always {
+                    junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: false
+                    archiveArtifacts artifacts: 'target/screenshots/**', allowEmptyArchive: true
+                }
+                failure {
+                    echo 'Tests failed: deployment is blocked. Failure screenshots are archived with this build.'
+                }
             }
         }
 

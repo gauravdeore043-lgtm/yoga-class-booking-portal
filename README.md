@@ -50,3 +50,4 @@ See [docs/04-git-branching-policy.md](docs/04-git-branching-policy.md).
 | 3 | [SRS, architecture and setup](docs/03-srs-architecture-and-setup.md) |
 | 4 | [Git branching policy](docs/04-git-branching-policy.md) |
 | 7–8 | [Jenkins CI job, pipeline and Tomcat deployment](docs/07-jenkins-ci-and-pipeline.md) |
+| 9–10 | [Selenium test plan and continuous testing](docs/09-selenium-test-plan.md) |
